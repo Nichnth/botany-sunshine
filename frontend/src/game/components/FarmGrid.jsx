@@ -18,7 +18,7 @@ const Slot = ({ slot, onClick }) => {
   return (
     <button
       onClick={() => onClick(slot)}
-      data-testid={`farm-slot-${slot.id}`}
+      data-testid={`slot-${slot.id}`}
       className="relative aspect-square rounded-2xl border-2 transition-all hover:scale-[1.03] hover:shadow-md flex flex-col items-center justify-center p-2 group"
       style={{ background: colors.bg, borderColor: colors.border, color: colors.text }}
     >
