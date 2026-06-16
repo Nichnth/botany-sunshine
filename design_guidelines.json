@@ -1,0 +1,103 @@
+{
+  "theme": "light",
+  "archetype": "1_organic_and_earthy",
+  "context": "Documentation site transitioning to a 2D top-down hydroponic simulation game",
+  "typography": {
+    "fonts": {
+      "heading": "Outfit",
+      "body": "Manrope",
+      "mono": "JetBrains Mono"
+    },
+    "scale": {
+      "h1": "text-4xl sm:text-5xl tracking-tight font-bold",
+      "h2": "text-2xl sm:text-3xl tracking-tight font-semibold",
+      "h3": "text-xl sm:text-2xl font-medium",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm",
+      "label": "text-xs tracking-[0.2em] uppercase"
+    }
+  },
+  "colors": {
+    "background": "#F4F9F4",
+    "foreground": "#064E3B",
+    "primary": "#10B981",
+    "primary_hover": "#059669",
+    "primary_foreground": "#FFFFFF",
+    "secondary": "#E0F2FE",
+    "secondary_foreground": "#0284C7",
+    "accent": "#0EA5E9",
+    "card": "#FFFFFF",
+    "card_border": "#D1FAE5",
+    "muted": "#E5F0E5",
+    "muted_foreground": "#4B5563"
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous spacing. Bento grid structure for documentation panels to separate diagram view from state tables.",
+    "container": "p-6 md:p-8 lg:p-12",
+    "gap": "gap-6 md:gap-8",
+    "border_radius": "rounded-2xl"
+  },
+  "components": {
+    "sidebar": {
+      "style": "fixed left-0 top-0 h-full w-72 bg-white border-r border-[#D1FAE5] p-6 overflow-y-auto z-40",
+      "active_link": "bg-[#E0F2FE] text-[#0284C7] font-semibold rounded-xl px-4 py-3 flex items-center gap-3",
+      "inactive_link": "text-[#4B5563] hover:bg-[#F4F9F4] hover:text-[#064E3B] font-medium rounded-xl px-4 py-3 flex items-center gap-3 transition-colors"
+    },
+    "fsm_viewer_card": {
+      "style": "bg-white border border-[#D1FAE5] rounded-2xl shadow-sm relative overflow-hidden flex flex-col h-[600px]",
+      "background_pattern": "bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px]",
+      "description": "The background pattern hints at the 2D top-down grid of the upcoming game."
+    },
+    "data_table": {
+      "container": "bg-white border border-[#D1FAE5] rounded-2xl overflow-hidden shadow-sm",
+      "header": "bg-[#F4F9F4] text-[#064E3B] font-semibold text-left p-4 border-b border-[#D1FAE5]",
+      "row": "border-b border-[#E5F0E5] hover:bg-[#F9FCF9] transition-colors",
+      "cell": "p-4 text-sm text-[#4B5563]"
+    },
+    "button": {
+      "primary": "bg-[#10B981] hover:bg-[#059669] text-white px-6 py-3 rounded-xl transition-all shadow-sm active:translate-y-[1px] font-semibold inline-flex items-center gap-2",
+      "outline": "border-2 border-[#10B981] text-[#10B981] hover:bg-[#F4F9F4] px-6 py-3 rounded-xl transition-all font-semibold inline-flex items-center gap-2"
+    }
+  },
+  "motion": {
+    "hover": "transition-all duration-200 ease-in-out",
+    "page_load": "animate-in fade-in slide-in-from-bottom-4 duration-500",
+    "sidebar_link": "transition-colors duration-150"
+  },
+  "icons": {
+    "library": "lucide-react",
+    "usage": "Use icons for the 13 navigation links (e.g., Leaf for seeding, Droplet for watering, Tool for repairing). Use Download icon for the drawio download button."
+  },
+  "media": {
+    "image_urls": [
+      {
+        "url": "https://images.unsplash.com/photo-1682629088818-1ec55d0cf45b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwyfHxoeWRyb3BvbmljJTIwZmFybWluZ3xlbnwwfHx8fDE3ODE2MjExMzl8MA&ixlib=rb-4.1.0&q=85",
+        "category": "hero_background",
+        "description": "White tower with hydroponic plants. Use heavily faded or as a masked overlay in the welcome/empty state to introduce the farming theme."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1580982327559-c1202864eb05?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwxfHxoeWRyb3BvbmljJTIwZmFybWluZ3xlbnwwfHx8fDE3ODE2MjExMzl8MA&ixlib=rb-4.1.0&q=85",
+        "category": "about_welcome",
+        "description": "Two men examining a plant. Great for the onboarding modal or documentation introduction page."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1727099079513-952d40de9d78?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwzfHxoeWRyb3BvbmljJTIwZmFybWluZ3xlbnwwfHx8fDE3ODE2MjExMzl8MA&ixlib=rb-4.1.0&q=85",
+        "category": "aesthetic_filler",
+        "description": "Greenhouse with green plants. Useful for decorative banners or footer background."
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Build a modern documentation layout: Fixed Sidebar on the left (w-72) and a Main Content area on the right (ml-72).",
+    "UI LANGUAGE MUST BE BAHASA INDONESIA. Example translations: 'Unduh .drawio' (Download .drawio), 'Tabel Status' (State Table), 'Aksi' (Events), 'Transisi' (Transitions).",
+    "Implement the 13 FSM categories in the sidebar navigation: Pembelian Bibit, Penyemaian, Penyiraman, Pemberian Nutrisi, Perbaikan Alat, Panen & Jual, Siklus Hidup Tanaman, Status Pemain, Status Peralatan, Ekonomi & Pasar, Sistem Cuaca, Keseimbangan pH & Air, Siklus Siang/Malam.",
+    "Main Area Layout (Bento Grid Mode B): Top section is a large header with title and 'Unduh .drawio' button. Middle is the FSM Diagram Viewer Card (h-[600px] with CSS grid background). Bottom section contains 3 data tables (Status, Event, Transisi) mapped nicely in a CSS grid (grid-cols-1 xl:grid-cols-3 gap-6).",
+    "FSM Viewer Background: Use the custom background pattern provided in `fsm_viewer_card.background_pattern` to create a 2D top-down grid look, hinting at the simulation game.",
+    "Data State: Because there is no DB, use Local Storage or static JSON to hold the FSM data definitions and diagram URLs/state for the 13 categories.",
+    "Styling: Override the Shadcn default colors in `index.css` to match the Organic & Earthy archetype (Greens and Off-Whites). Do not use default Vercel-look. Remove sharp card borders and prefer rounded-2xl.",
+    "Testing: Add `data-testid` to ALL interactive elements. e.g., `data-testid=\"nav-penyiraman\"`, `data-testid=\"btn-download-drawio\"`.",
+    "Install Google Fonts (Outfit, Manrope, JetBrains Mono) via index.html or index.css imports.",
+    "Use `lucide-react` for all icons. Ensure icons are present for each FSM category in the sidebar."
+  ]
+}
