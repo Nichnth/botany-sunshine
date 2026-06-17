@@ -19,86 +19,148 @@ const Slot = ({ slot, onClick }) => {
     <button
       onClick={() => onClick(slot)}
       data-testid={`slot-${slot.id}`}
-      className="relative w-20 h-20 rounded-full border-4 flex flex-col items-center justify-center p-1.5 group transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] z-10"
-      style={{
-        backgroundColor: "#201e1b", // Charcoal/clay pebble background of the pot
-        borderColor: colors.border.split('-')[1] === "slate" ? "#475569" : 
-                     colors.border.split('-')[1] === "yellow" ? "#facc15" :
-                     colors.border.split('-')[1] === "emerald" ? "#10b981" :
-                     colors.border.split('-')[1] === "amber" ? "#f59e0b" :
-                     colors.border.split('-')[1] === "red" ? "#ef4444" : "#71717a",
-        color: colors.text
-      }}
+      className="relative w-24 h-28 flex flex-col items-center justify-center group transition-all hover:scale-105 active:scale-95 z-10"
     >
       {/* Slot Index */}
-      <span className="absolute -top-7 bg-slate-800 text-[9px] text-slate-300 font-mono px-1.5 py-0.5 rounded shadow border border-slate-700 select-none">
+      <span className="absolute top-1 bg-slate-800 text-[8px] text-slate-300 font-mono px-1.5 py-0.5 rounded shadow border border-slate-700 select-none">
         N-{slot.id + 1}
       </span>
 
-      {/* Inside the Net Pot */}
-      {slot.status === "broken" && (
-        <div className="text-2xl animate-bounce">{colors.emoji}</div>
-      )}
+      {/* SVG drawing of a 3D Hydroponic Net Pot Cup */}
+      <div className="w-20 h-20 relative flex items-center justify-center mt-3">
+        <svg viewBox="0 0 100 100" className="w-20 h-20 absolute inset-0 select-none pointer-events-none">
+          <defs>
+            {/* Clay pebble texture gradient */}
+            <radialGradient id="pebble-grad" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#c2410c" />
+              <stop offset="70%" stopColor="#7c2d12" />
+              <stop offset="100%" stopColor="#431407" />
+            </radialGradient>
+            
+            {/* Net pot glow depending on state */}
+            <filter id={`glow-${slot.id}`} x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" floodColor={
+                slot.status === "empty" ? "#475569" :
+                slot.status === "seeded" ? "#eab308" :
+                slot.status === "growing" ? "#10b981" :
+                slot.status === "mature" ? "#f59e0b" :
+                slot.status === "wilted" ? "#ef4444" : "#71717a"
+              } floodOpacity="0.8" />
+            </filter>
+          </defs>
 
-      {slot.status === "empty" && (
-        <Sprout size={20} className="text-slate-500 group-hover:text-emerald-400 transition-colors" />
-      )}
+          {/* 1. Hole Shadow inside the PVC pipe */}
+          <ellipse cx="50" cy="80" rx="30" ry="12" fill="#1e293b" opacity="0.8" />
 
-      {seed && slot.status !== "broken" && (
-        <>
-          {/* Plant Emoji */}
+          {/* 2. Water / Nutrient film inside the pipe (under the cup) */}
+          <path d="M 22 80 C 35 84, 65 84, 78 80 C 65 77, 35 77, 22 80 Z" fill="#38bdf8" opacity="0.5" className="animate-pulse" />
+
+          {/* 3. Tapered Net Pot Basket (Back grid ribs) */}
+          <path d="M 25 35 L 32 78 C 34 83, 66 83, 68 78 L 75 35" fill="none" stroke="#27272a" strokeWidth="3" />
+          
+          {/* Vertical mesh bars of the net pot */}
+          <line x1="33" y1="36" x2="38" y2="76" stroke="#18181b" strokeWidth="2.5" />
+          <line x1="50" y1="36" x2="50" y2="79" stroke="#18181b" strokeWidth="2.5" />
+          <line x1="67" y1="36" x2="62" y2="76" stroke="#18181b" strokeWidth="2.5" />
+          
+          {/* Horizontal mesh rings */}
+          <path d="M 28 50 Q 50 54 72 50" fill="none" stroke="#18181b" strokeWidth="2" />
+          <path d="M 30 65 Q 50 69 70 65" fill="none" stroke="#18181b" strokeWidth="2" />
+
+          {/* 4. Clay Pebbles (Media) filled inside the net pot */}
+          {slot.status !== "empty" && slot.status !== "broken" && (
+            <g>
+              <circle cx="42" cy="40" r="7" fill="url(#pebble-grad)" />
+              <circle cx="58" cy="42" r="8" fill="url(#pebble-grad)" />
+              <circle cx="48" cy="46" r="8" fill="url(#pebble-grad)" />
+              <circle cx="37" cy="48" r="6" fill="url(#pebble-grad)" />
+              <circle cx="62" cy="49" r="6" fill="url(#pebble-grad)" />
+              <circle cx="50" cy="36" r="7" fill="url(#pebble-grad)" />
+            </g>
+          )}
+
+          {/* 5. Front Lip Rim of the Net Pot (Sitting on the PVC pipe) */}
+          <ellipse cx="50" cy="35" rx="28" ry="10" fill="#0f0f11" stroke={
+            slot.status === "empty" ? "#475569" :
+            slot.status === "seeded" ? "#eab308" :
+            slot.status === "growing" ? "#10b981" :
+            slot.status === "mature" ? "#f59e0b" :
+            slot.status === "wilted" ? "#ef4444" : "#71717a"
+          } strokeWidth="2.5" filter={`url(#glow-${slot.id})`} style={{ transition: "stroke 0.3s" }} />
+
+          {/* 6. Roots growing out of the bottom of the cup (visible when plant grows) */}
+          {seed && slot.growth > 25 && (
+            <g opacity={slot.growth / 100} className="animate-pulse">
+              <path d="M 40 78 Q 38 88 42 94" fill="none" stroke="#f1f5f9" strokeWidth="1.5" />
+              <path d="M 50 79 Q 52 90 48 97" fill="none" stroke="#e2e8f0" strokeWidth="1.5" />
+              <path d="M 60 78 Q 63 87 59 93" fill="none" stroke="#f1f5f9" strokeWidth="1.5" />
+            </g>
+          )}
+        </svg>
+
+        {/* 7. Actual Plant Asset sitting in the net pot */}
+        {seed && slot.status !== "broken" && (
           <div
-            className="text-3xl mb-0.5 select-none"
+            className="absolute text-4xl select-none"
             style={{
               filter: slot.status === "wilted" ? "grayscale(85%)" : "none",
-              transform: `scale(${0.65 + (slot.growth / 100) * 0.45})`,
-              transition: "transform 0.4s ease-out",
+              transform: `scale(${0.65 + (slot.growth / 100) * 0.45}) translate(-1px, -14px)`,
+              transition: "transform 0.4s ease-out, filter 0.3s",
+              transformOrigin: "bottom center"
             }}
           >
             {seed.emoji}
           </div>
+        )}
 
-          {/* Progress Bar inside pot */}
-          <div className="w-12 bg-zinc-800 rounded-full h-1 overflow-hidden">
-            <div
-              className="h-1 rounded-full transition-all"
-              style={{
-                width: `${slot.growth}%`,
-                background: slot.status === "mature" ? "#F59E0B" : "#10B981",
-              }}
-            />
-          </div>
+        {/* Empty placeholder icon */}
+        {slot.status === "empty" && (
+          <Sprout size={18} className="absolute text-slate-500 group-hover:text-emerald-400 transition-colors pointer-events-none" />
+        )}
 
-          {/* Water/Nutrient Status Indicators */}
-          <div className="absolute -bottom-4 flex items-center justify-center gap-1.5 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded-full shadow text-[8px] text-white">
-            <span className="flex items-center gap-0.5 font-mono">
-              <Droplet size={8} className={slot.water < 30 ? "text-red-400" : "text-sky-400"} />
-              {Math.round(slot.water)}
-            </span>
-            <span className="flex items-center gap-0.5 font-mono">
-              <FlaskConical size={8} className={slot.nutrient < 20 ? "text-red-400" : "text-emerald-400"} />
-              {Math.round(slot.nutrient)}
-            </span>
-          </div>
+        {/* Broken icon */}
+        {slot.status === "broken" && (
+          <div className="absolute text-xl animate-bounce pointer-events-none">🔧</div>
+        )}
+      </div>
 
-          {/* Durability indicator if low */}
-          {slot.durability < 30 && (
-            <div className="absolute -top-3 right-0 bg-amber-500 text-white font-mono text-[8px] px-1 py-0.5 rounded shadow">
-              {Math.round(slot.durability)}%
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Badges/Overlays */}
-      {slot.status === "mature" && (
-        <div className="absolute -top-3 -right-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow border border-white animate-pulse">
-          PANEN!
+      {/* Progress Line */}
+      {seed && slot.status !== "broken" && (
+        <div className="w-14 bg-zinc-800 rounded-full h-1 overflow-hidden mt-1.5 z-20">
+          <div
+            className="h-1 rounded-full transition-all"
+            style={{
+              width: `${slot.growth}%`,
+              background: slot.status === "mature" ? "#F59E0B" : "#10B981",
+            }}
+          />
         </div>
       )}
 
+      {/* Status Overlay details (water/nutrient) */}
+      {seed && slot.status !== "broken" && (
+        <div className="absolute -bottom-1.5 flex items-center justify-center gap-1.5 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded-full shadow text-[8px] text-white z-20">
+          <span className="flex items-center gap-0.5 font-mono">
+            <Droplet size={8} className={slot.water < 30 ? "text-red-400" : "text-sky-400"} />
+            {Math.round(slot.water)}
+          </span>
+          <span className="flex items-center gap-0.5 font-mono">
+            <FlaskConical size={8} className={slot.nutrient < 20 ? "text-red-400" : "text-emerald-400"} />
+            {Math.round(slot.nutrient)}
+          </span>
+        </div>
+      )}
+
+      {/* Panen Overlay badge */}
+      {slot.status === "mature" && (
+        <div className="absolute top-9 right-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow border border-white animate-pulse z-20">
+          PANEN
+        </div>
+      )}
+
+      {/* Wilted warning */}
       {slot.status === "wilted" && (
-        <div className="absolute -top-3 -right-3 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow border border-white">
+        <div className="absolute top-9 right-1 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow border border-white z-20">
           🥀
         </div>
       )}
@@ -138,7 +200,7 @@ const FarmGrid = ({ slots, onSlotClick }) => {
       <div className="absolute right-9 top-4 bottom-24 w-1.5 border-r-2 border-dashed border-emerald-500/40 pointer-events-none" />
 
       {/* The 3 PVC Pipes of the Hydroponic Rack */}
-      <div className="relative flex flex-col gap-10">
+      <div className="relative flex flex-col gap-8">
         {pipes.map((pipeSlots, rowIndex) => (
           <div key={rowIndex} className="relative flex flex-col items-center">
             {/* LED Grow Light fixture hanging above */}
