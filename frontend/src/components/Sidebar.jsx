@@ -117,14 +117,6 @@ const Sidebar = () => {
         </div>
       ))}
 
-      <div className="mt-auto pt-6 border-t border-[#D1FAE5]">
-        <div className="bg-[#E0F2FE] rounded-xl p-4">
-          <p className="text-xs font-semibold text-[#0284C7] mb-1">Fase 1: Dokumentasi</p>
-          <p className="text-xs text-[#4B5563] leading-relaxed">
-            13 FSM diagram siap. Fase 2: implementasi game 2D top-down.
-          </p>
-        </div>
-      </div>
     </aside>
   );
 };
