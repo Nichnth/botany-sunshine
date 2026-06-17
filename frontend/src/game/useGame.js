@@ -44,9 +44,9 @@ const reducer = (state, action) => {
       const weatherDef = getWeather(state.weather);
       const waterDrain = weatherDef.waterDrain;
 
-      // Random weather change every 6 hours
+      // Random weather change every 8 hours
       let nextWeather = state.weather;
-      if (nextHour % 6 === 0) {
+      if (nextHour % 8 === 0) {
         const wOptions = WEATHERS.map((w) => w.id);
         nextWeather = wOptions[Math.floor(Math.random() * wOptions.length)];
       }
@@ -56,8 +56,8 @@ const reducer = (state, action) => {
         if (slot.status === "empty" || slot.status === "broken") return slot;
 
         // Drain resources (water percentage and PPM)
-        const newWater = Math.max(0, slot.water - 3 * waterDrain);
-        const newNutrient = Math.max(0, slot.nutrient - 15); // Consume 15 PPM per tick
+        const newWater = Math.max(0, slot.water - 2* waterDrain);
+        const newNutrient = Math.max(0, slot.nutrient - 4); // Consume 4 ppm per tick
         const phDrift = (Math.random() - 0.5) * 0.1;
         const newPh = Math.max(3.5, Math.min(8.5, slot.ph + phDrift));
 
@@ -249,7 +249,7 @@ const reducer = (state, action) => {
       
       const slots = state.slots.map((s) =>
         s.id === slotId 
-          ? { ...s, nutrient: Math.min(3000, s.nutrient + 450), nutrientType: supplyId } 
+          ? { ...s, nutrient: Math.min(3000, s.nutrient + 338), nutrientType: supplyId } 
           : s
       );
       const inventory = {
@@ -259,7 +259,7 @@ const reducer = (state, action) => {
       const supplyName = getSupply(supplyId)?.name || "Nutrisi";
       const newState = addLog(
         { ...state, slots, inventory, stamina: Math.max(0, state.stamina - 2) },
-        `🧪 Memberi ${supplyName} ke slot #${slotId + 1} (+450 PPM)`
+        `🧪 Memberi ${supplyName} ke slot #${slotId + 1} (+338 PPM)`
       );
       saveState(newState);
       return newState;
@@ -382,7 +382,7 @@ const reducer = (state, action) => {
         // Simulate ~8 hours of growth
         const hours = state.hour >= 6 ? 24 - state.hour + 6 : 6 - state.hour;
         const waterDrain = 3 * hours;
-        const nutDrain = 15 * hours; // 15 PPM per hour
+        const nutDrain = 7.5 * hours; // 7.5 PPM per hour
         let newWater = Math.max(0, slot.water - waterDrain);
         let newNut = Math.max(0, slot.nutrient - nutDrain);
         

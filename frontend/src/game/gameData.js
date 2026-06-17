@@ -96,9 +96,9 @@ export const SEEDS_CATALOG = [
 ];
 
 export const SUPPLIES = [
-  { id: "abmix_daun", name: "AB Mix Daun", emoji: "🧪", price: 25, description: "Nutrisi Sayuran Daun (Selada/Bayam/Kangkung/Pakcoy) - Optimal PPM" },
-  { id: "abmix_buah", name: "AB Mix Buah", emoji: "🧪", price: 35, description: "Nutrisi Tanaman Buah (Tomat Cherry) - High PPM" },
-  { id: "abmix_stroberi", name: "AB Mix Stroberi", emoji: "🧪", price: 40, description: "Nutrisi Khusus Stroberi - Salt-sensitive PPM" },
+  { id: "abmix_daun", name: "AB Mix Daun", emoji: "🧪", price: 15, description: "Nutrisi Sayuran Daun (Selada/Bayam/Kangkung/Pakcoy) - Optimal PPM" },
+  { id: "abmix_buah", name: "AB Mix Buah", emoji: "🧪", price: 25, description: "Nutrisi Tanaman Buah (Tomat Cherry) - High PPM" },
+  { id: "abmix_stroberi", name: "AB Mix Stroberi", emoji: "🧪", price: 35, description: "Nutrisi Khusus Stroberi - Salt-sensitive PPM" },
   { id: "ph_up", name: "pH Up", emoji: "💧", price: 15, description: "Menaikkan pH larutan (+0.4 per dosis)" },
   { id: "ph_down", name: "pH Down", emoji: "🧴", price: 15, description: "Menurunkan pH larutan (-0.4 per dosis)" },
   { id: "spare_pump", name: "Suku Cadang Pompa", emoji: "🔧", price: 50, description: "Untuk perbaikan pompa slot" },
