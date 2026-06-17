@@ -7,6 +7,7 @@ import {
   getSeed,
   initialGameState,
   getWeather,
+  getSupply,
 } from "./gameData";
 
 const loadState = () => {
@@ -54,9 +55,9 @@ const reducer = (state, action) => {
       const slots = state.slots.map((slot) => {
         if (slot.status === "empty" || slot.status === "broken") return slot;
 
-        // Drain resources
+        // Drain resources (water percentage and PPM)
         const newWater = Math.max(0, slot.water - 3 * waterDrain);
-        const newNutrient = Math.max(0, slot.nutrient - 2);
+        const newNutrient = Math.max(0, slot.nutrient - 15); // Consume 15 PPM per tick
         const phDrift = (Math.random() - 0.5) * 0.1;
         const newPh = Math.max(3.5, Math.min(8.5, slot.ph + phDrift));
 
@@ -67,17 +68,40 @@ const reducer = (state, action) => {
         let status = slot.status;
         let growth = slot.growth;
 
-        // Growth conditions
+        // Growth conditions evaluated dynamically against specific plant guides
         const seed = getSeed(slot.seedId);
         const totalGrowthNeeded = seed ? seed.growthDays * 24 : 100;
-        const optimalConditions =
-          newWater > 30 && newNutrient > 20 && newPh >= 5.5 && newPh <= 6.8 && newDur > 0;
-        const wiltConditions =
-          newWater < 15 || newNutrient < 10 || newPh < 4.5 || newPh > 7.5 || newDur === 0;
+        
+        let optimalConditions = false;
+        let wiltConditions = false;
+        let isOptimalNutrientType = true;
+
+        if (seed) {
+          isOptimalNutrientType = slot.nutrientType === seed.optimalNutrientType;
+          
+          optimalConditions =
+            newWater >= seed.waterToleranceMin &&
+            newNutrient >= seed.ppmMin &&
+            newNutrient <= seed.ppmMax &&
+            newPh >= seed.phMin &&
+            newPh <= seed.phMax &&
+            newDur > 0;
+            
+          wiltConditions =
+            newWater < (seed.waterToleranceMin / 2) ||
+            newNutrient < (seed.ppmMin / 2) ||
+            newNutrient > (seed.ppmMax * 1.5) || // Nutrient burn
+            newPh < (seed.phMin - 0.8) ||
+            newPh > (seed.phMax + 0.8) ||
+            newDur === 0;
+        } else {
+          optimalConditions = newWater > 30 && newDur > 0;
+        }
 
         if (optimalConditions && status !== "mature" && status !== "wilted") {
-          // Growth per hour
-          growth = Math.min(100, growth + (100 / totalGrowthNeeded) * weatherDef.growthMod);
+          // Growth per hour (speed is halved if using the wrong nutrient type)
+          const speedFactor = isOptimalNutrientType ? 1.0 : 0.5;
+          growth = Math.min(100, growth + (100 / totalGrowthNeeded) * weatherDef.growthMod * speedFactor);
           if (growth >= 100) {
             status = "mature";
           } else if (growth >= 25) {
@@ -89,7 +113,7 @@ const reducer = (state, action) => {
           status = "wilted";
         } else if (!wiltConditions && status === "wilted") {
           // Recover if conditions improve
-          status = growth > 25 ? "growing" : "seeded";
+          status = growth >= 25 ? "growing" : "seeded";
         }
 
         // Random equipment break
@@ -186,7 +210,7 @@ const reducer = (state, action) => {
 
       const slots = state.slots.map((s) =>
         s.id === slotId
-          ? { ...s, status: "seeded", seedId, growth: 0, plantedDay: state.day }
+          ? { ...s, status: "seeded", seedId, growth: 0, plantedDay: state.day, nutrientType: null }
           : s
       );
       const inventory = {
@@ -216,19 +240,26 @@ const reducer = (state, action) => {
     }
 
     case "FERTILIZE": {
-      const { slotId } = action;
-      const abQty = state.inventory.supplies.abmix || 0;
-      if (abQty <= 0) return addLog(state, `❌ AB Mix habis, beli di toko`);
+      const { slotId, supplyId } = action;
+      const abQty = state.inventory.supplies[supplyId] || 0;
+      if (abQty <= 0) {
+        const name = getSupply(supplyId)?.name || "Nutrisi";
+        return addLog(state, `❌ ${name} habis, beli di toko`);
+      }
+      
       const slots = state.slots.map((s) =>
-        s.id === slotId ? { ...s, nutrient: Math.min(100, s.nutrient + 50) } : s
+        s.id === slotId 
+          ? { ...s, nutrient: Math.min(3000, s.nutrient + 450), nutrientType: supplyId } 
+          : s
       );
       const inventory = {
         ...state.inventory,
-        supplies: { ...state.inventory.supplies, abmix: abQty - 1 },
+        supplies: { ...state.inventory.supplies, [supplyId]: abQty - 1 },
       };
+      const supplyName = getSupply(supplyId)?.name || "Nutrisi";
       const newState = addLog(
         { ...state, slots, inventory, stamina: Math.max(0, state.stamina - 2) },
-        `🧪 Memberi nutrisi slot #${slotId + 1}`
+        `🧪 Memberi ${supplyName} ke slot #${slotId + 1} (+450 PPM)`
       );
       saveState(newState);
       return newState;
@@ -284,7 +315,7 @@ const reducer = (state, action) => {
 
       const slots = state.slots.map((s) =>
         s.id === slotId
-          ? { ...s, status: "empty", seedId: null, growth: 0, plantedDay: null }
+          ? { ...s, status: "empty", seedId: null, growth: 0, plantedDay: null, nutrientType: null }
           : s
       );
       const inventory = {
@@ -307,7 +338,7 @@ const reducer = (state, action) => {
       const { slotId } = action;
       const slots = state.slots.map((s) =>
         s.id === slotId
-          ? { ...s, status: "empty", seedId: null, growth: 0, plantedDay: null, water: 80, nutrient: 60, ph: 6.0 }
+          ? { ...s, status: "empty", seedId: null, growth: 0, plantedDay: null, water: 80, nutrient: 200, ph: 6.0, nutrientType: null }
           : s
       );
       const newState = addLog(
@@ -347,21 +378,48 @@ const reducer = (state, action) => {
         if (slot.status === "empty" || slot.status === "broken") return slot;
         const seed = getSeed(slot.seedId);
         const totalGrowthNeeded = seed ? seed.growthDays * 24 : 100;
+        
         // Simulate ~8 hours of growth
         const hours = state.hour >= 6 ? 24 - state.hour + 6 : 6 - state.hour;
         const waterDrain = 3 * hours;
-        const nutDrain = 2 * hours;
+        const nutDrain = 15 * hours; // 15 PPM per hour
         let newWater = Math.max(0, slot.water - waterDrain);
         let newNut = Math.max(0, slot.nutrient - nutDrain);
+        
         let growth = slot.growth;
-        if (newWater > 30 && newNut > 20 && slot.ph >= 5.5 && slot.ph <= 6.8) {
-          growth = Math.min(100, growth + (100 / totalGrowthNeeded) * hours);
+        let isOptimalNutrientType = !seed || slot.nutrientType === seed.optimalNutrientType;
+        
+        let optimalConditions = false;
+        let wiltConditions = false;
+
+        if (seed) {
+          optimalConditions =
+            newWater >= seed.waterToleranceMin &&
+            newNut >= seed.ppmMin &&
+            newNut <= seed.ppmMax &&
+            slot.ph >= seed.phMin &&
+            slot.ph <= seed.phMax;
+
+          wiltConditions =
+            newWater < (seed.waterToleranceMin / 2) ||
+            newNut < (seed.ppmMin / 2) ||
+            newNut > (seed.ppmMax * 1.5) ||
+            slot.ph < (seed.phMin - 0.8) ||
+            slot.ph > (seed.phMax + 0.8);
         }
+
+        if (optimalConditions) {
+          const speed = isOptimalNutrientType ? 1.0 : 0.5;
+          growth = Math.min(100, growth + (100 / totalGrowthNeeded) * hours * speed);
+        }
+        
         let status = slot.status;
         if (growth >= 100) status = "mature";
-        else if (newWater < 15 || newNut < 10) status = "wilted";
+        else if (wiltConditions) status = "wilted";
+        
         return { ...slot, water: newWater, nutrient: newNut, growth, status };
       });
+      
       const newState = addLog(
         { ...state, hour: nextHour, day: nextDay, stamina: 100, slots },
         `😴 Tidur hingga pagi. Stamina pulih.`
@@ -406,7 +464,7 @@ export const useGame = () => {
     ),
     plant: useCallback((slotId, seedId) => dispatch({ type: "PLANT", slotId, seedId }), []),
     water: useCallback((slotId) => dispatch({ type: "WATER", slotId }), []),
-    fertilize: useCallback((slotId) => dispatch({ type: "FERTILIZE", slotId }), []),
+    fertilize: useCallback((slotId, supplyId) => dispatch({ type: "FERTILIZE", slotId, supplyId }), []),
     adjustPh: useCallback(
       (slotId, direction) => dispatch({ type: "ADJUST_PH", slotId, direction }),
       []

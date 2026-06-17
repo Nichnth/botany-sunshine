@@ -3,19 +3,105 @@
  */
 
 export const SEEDS_CATALOG = [
-  { id: "selada", name: "Selada", emoji: "🥬", price: 15, growthDays: 4, sellPrice: 35, color: "#86EFAC" },
-  { id: "bayam", name: "Bayam", emoji: "🌿", price: 12, growthDays: 3, sellPrice: 28, color: "#4ADE80" },
-  { id: "kangkung", name: "Kangkung", emoji: "🥦", price: 10, growthDays: 3, sellPrice: 22, color: "#22C55E" },
-  { id: "pakcoy", name: "Pakcoy", emoji: "🥗", price: 18, growthDays: 5, sellPrice: 45, color: "#84CC16" },
-  { id: "tomat", name: "Tomat Cherry", emoji: "🍅", price: 35, growthDays: 8, sellPrice: 120, color: "#EF4444" },
-  { id: "strawberry", name: "Strawberry", emoji: "🍓", price: 60, growthDays: 12, sellPrice: 240, color: "#F43F5E" },
+  { 
+    id: "selada", 
+    name: "Selada", 
+    emoji: "🥬", 
+    price: 15, 
+    growthDays: 4, 
+    sellPrice: 105, 
+    color: "#86EFAC",
+    phMin: 5.5, 
+    phMax: 6.0, 
+    ppmMin: 560, 
+    ppmMax: 840,
+    optimalNutrientType: "abmix_daun",
+    waterToleranceMin: 40
+  },
+  { 
+    id: "bayam", 
+    name: "Bayam", 
+    emoji: "🌿", 
+    price: 12, 
+    growthDays: 3, 
+    sellPrice: 84, 
+    color: "#4ADE80",
+    phMin: 5.5, 
+    phMax: 6.6, 
+    ppmMin: 1260, 
+    ppmMax: 1610,
+    optimalNutrientType: "abmix_daun",
+    waterToleranceMin: 35
+  },
+  { 
+    id: "kangkung", 
+    name: "Kangkung", 
+    emoji: "🥦", 
+    price: 10, 
+    growthDays: 3, 
+    sellPrice: 66, 
+    color: "#22C55E",
+    phMin: 5.5, 
+    phMax: 6.5, 
+    ppmMin: 700, 
+    ppmMax: 1200,
+    optimalNutrientType: "abmix_daun",
+    waterToleranceMin: 30
+  },
+  { 
+    id: "pakcoy", 
+    name: "Pakcoy", 
+    emoji: "🥗", 
+    price: 18, 
+    growthDays: 5, 
+    sellPrice: 135, 
+    color: "#84CC16",
+    phMin: 5.5, 
+    phMax: 6.5, 
+    ppmMin: 800, 
+    ppmMax: 1200,
+    optimalNutrientType: "abmix_daun",
+    waterToleranceMin: 40
+  },
+  { 
+    id: "tomat", 
+    name: "Tomat Cherry", 
+    emoji: "🍅", 
+    price: 35, 
+    growthDays: 8, 
+    sellPrice: 360, 
+    color: "#EF4444",
+    phMin: 5.5, 
+    phMax: 6.5, 
+    ppmMin: 1400, 
+    ppmMax: 2800,
+    optimalNutrientType: "abmix_buah",
+    waterToleranceMin: 50
+  },
+  { 
+    id: "strawberry", 
+    name: "Strawberry", 
+    emoji: "🍓", 
+    price: 60, 
+    growthDays: 12, 
+    sellPrice: 700, 
+    color: "#F43F5E",
+    phMin: 5.5, 
+    phMax: 6.5, 
+    ppmMin: 500, 
+    ppmMax: 1100,
+    optimalNutrientType: "abmix_stroberi",
+    waterToleranceMin: 45
+  },
 ];
 
 export const SUPPLIES = [
-  { id: "abmix", name: "AB Mix Nutrisi", emoji: "🧪", price: 25, description: "Untuk meracik larutan nutrisi" },
-  { id: "ph_up", name: "pH Up", emoji: "💧", price: 15, description: "Menaikkan pH larutan" },
-  { id: "ph_down", name: "pH Down", emoji: "🧴", price: 15, description: "Menurunkan pH larutan" },
-  { id: "spare_pump", name: "Suku Cadang Pompa", emoji: "🔧", price: 50, description: "Untuk perbaikan pompa" },
+  { id: "abmix_daun", name: "AB Mix Daun", emoji: "🧪", price: 25, description: "Nutrisi Sayuran Daun (Selada/Bayam/Kangkung/Pakcoy) - Optimal PPM" },
+  { id: "abmix_buah", name: "AB Mix Buah", emoji: "🧪", price: 35, description: "Nutrisi Tanaman Buah (Tomat Cherry) - High PPM" },
+  { id: "abmix_stroberi", name: "AB Mix Stroberi", emoji: "🧪", price: 40, description: "Nutrisi Khusus Stroberi - Salt-sensitive PPM" },
+  { id: "ph_up", name: "pH Up", emoji: "💧", price: 15, description: "Menaikkan pH larutan (+0.4 per dosis)" },
+  { id: "ph_down", name: "pH Down", emoji: "🧴", price: 15, description: "Menurunkan pH larutan (-0.4 per dosis)" },
+  { id: "spare_pump", name: "Suku Cadang Pompa", emoji: "🔧", price: 50, description: "Untuk perbaikan pompa slot" },
 ];
 
 export const WEATHERS = [
@@ -46,18 +132,21 @@ export const initialGameState = () => ({
     seedId: null,
     growth: 0, // 0-100 (100 = ready to harvest)
     water: 80,
-    nutrient: 60,
+    nutrient: 200, // Starting PPM
+    nutrientType: null, // abmix_daun | abmix_buah | abmix_stroberi
     ph: 6.0,
     durability: 100, // slot equipment health
     plantedDay: null,
   })),
   inventory: {
     seeds: {}, // {seedId: qty}
-    supplies: {}, // {supplyId: qty}
+    supplies: {
+      abmix_daun: 1, // Start with one Leafy Greens mix to help get started
+    },
     harvest: {}, // {seedId: qty}
   },
   log: [
-    { day: 1, hour: 6, text: "Selamat datang di farm hidroponikmu! Beli bibit di toko untuk mulai." },
+    { day: 1, hour: 6, text: "Selamat datang di Botany Sunshine! Beli bibit dan nutrisi yang sesuai di Toko." },
   ],
   paused: false,
 });
