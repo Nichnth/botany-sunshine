@@ -14,10 +14,56 @@ from datetime import datetime, timezone
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# MongoDB connection configuration with defaults
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+db_name = os.environ.get('DB_NAME', 'botany_sunshine')
+
+# In-memory Mock DB fallback if MongoDB is not available
+class MockCollection:
+    def __init__(self):
+        self.data = []
+
+    async def insert_one(self, doc):
+        self.data.append(dict(doc))
+        return None
+
+    def find(self, query=None, projection=None):
+        class FindCursor:
+            def __init__(self, data, projection):
+                self.data = data
+                self.projection = projection
+
+            async def to_list(self, limit):
+                result = []
+                for doc in self.data[:limit]:
+                    doc_copy = dict(doc)
+                    if self.projection and "_id" in self.projection and self.projection["_id"] == 0:
+                        doc_copy.pop("_id", None)
+                    result.append(doc_copy)
+                return result
+        return FindCursor(self.data, projection)
+
+class MockDatabase:
+    def __init__(self):
+        self.status_checks = MockCollection()
+
+class MockClient:
+    def __init__(self):
+        self._db = MockDatabase()
+    
+    def __getitem__(self, name):
+        return self._db
+
+    def close(self):
+        pass
+
+try:
+    client = AsyncIOMotorClient(mongo_url, serverSelectionTimeoutMS=2000)
+    db = client[db_name]
+except Exception as e:
+    logging.warning(f"Could not create MongoDB client: {e}. Using in-memory mock.")
+    client = MockClient()
+    db = client[db_name]
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -83,6 +129,19 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+@app.on_event("startup")
+async def startup_db_client():
+    global db, client
+    if hasattr(client, 'admin'):
+        try:
+            # Check if we can ping the database
+            await client.admin.command('ping')
+            logger.info("Successfully connected to MongoDB.")
+        except Exception as e:
+            logger.warning(f"MongoDB connection failed: {e}. Falling back to in-memory database.")
+            client = MockClient()
+            db = client[db_name]
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
