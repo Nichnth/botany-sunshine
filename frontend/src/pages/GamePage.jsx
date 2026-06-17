@@ -53,7 +53,7 @@ const GamePage = () => {
       <div
         className="min-h-screen text-slate-100 flex flex-col items-center justify-between p-6 relative select-none"
         style={{
-          backgroundImage: "linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.9)), url('/growroom_bg.png')",
+          backgroundImage: "linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.75)), url('/growroom_bg_sunny.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed",
@@ -138,7 +138,7 @@ const GamePage = () => {
       <div
         className="min-h-screen text-slate-100 flex flex-col items-center justify-center p-6 relative select-none"
         style={{
-          backgroundImage: "linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.9)), url('/growroom_bg.png')",
+          backgroundImage: "linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.75)), url('/growroom_bg_sunny.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed",
