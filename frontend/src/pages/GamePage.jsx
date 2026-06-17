@@ -44,7 +44,7 @@ const GamePage = () => {
               <Leaf size={20} />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-[#064E3B] font-[Outfit]">HidroFarm Sim</h1>
+              <h1 className="text-lg font-bold text-[#064E3B] font-[Outfit]">Botany Sunshine</h1>
               <Link
                 to="/"
                 className="text-[10px] text-[#0284C7] flex items-center gap-1 hover:underline"
