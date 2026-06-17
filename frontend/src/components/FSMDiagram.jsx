@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 
 /**
  * Renderer FSM dengan SVG murni.
  * Menampilkan state sebagai node bulat & transition sebagai panah lengkung dengan label.
+ * Mendukung drag-and-drop interaktif untuk memindahkan box state.
  */
 
 const NODE_W = 140;
@@ -73,9 +74,118 @@ const getEdgePath = (from, to, curveOffset = 0) => {
 
 export const FSMDiagram = ({ fsm }) => {
   const [hoveredState, setHoveredState] = useState(null);
+  const [nodePositions, setNodePositions] = useState({});
+  const [activeDragNode, setActiveDragNode] = useState(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  
+  const svgRef = useRef(null);
 
-  const { nodes, edges, viewBox } = useMemo(() => {
-    const stateMap = Object.fromEntries(fsm.states.map((s) => [s.id, s]));
+  // Initialize and reset local positions when FSM changes
+  useEffect(() => {
+    const initialPositions = {};
+    fsm.states.forEach((s) => {
+      initialPositions[s.id] = { x: s.x, y: s.y };
+    });
+    setNodePositions(initialPositions);
+  }, [fsm]);
+
+  // Stable viewBox calculations based on initial FSM configuration
+  const viewBoxParams = useMemo(() => {
+    const xs = fsm.states.map((s) => s.x);
+    const ys = fsm.states.map((s) => s.y);
+    const minX = Math.min(...xs) - 60;
+    const minY = Math.min(...ys) - 100;
+    const maxX = Math.max(...xs) + NODE_W + 60;
+    const maxY = Math.max(...ys) + NODE_H + 80;
+
+    return {
+      minX,
+      minY,
+      width: maxX - minX,
+      height: maxY - minY,
+      viewBox: `${minX} ${minY} ${maxX - minX} ${maxY - minY}`,
+    };
+  }, [fsm]);
+
+  // Drag handlers
+  const handleMouseDown = (e, nodeId) => {
+    e.preventDefault();
+    if (!svgRef.current) return;
+    
+    const rect = svgRef.current.getBoundingClientRect();
+    const svgX = viewBoxParams.minX + ((e.clientX - rect.left) / rect.width) * viewBoxParams.width;
+    const svgY = viewBoxParams.minY + ((e.clientY - rect.top) / rect.height) * viewBoxParams.height;
+    
+    const currentPos = nodePositions[nodeId] || { x: 0, y: 0 };
+    setActiveDragNode(nodeId);
+    setDragOffset({
+      x: svgX - currentPos.x,
+      y: svgY - currentPos.y,
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!activeDragNode || !svgRef.current) return;
+    
+    const rect = svgRef.current.getBoundingClientRect();
+    const svgX = viewBoxParams.minX + ((e.clientX - rect.left) / rect.width) * viewBoxParams.width;
+    const svgY = viewBoxParams.minY + ((e.clientY - rect.top) / rect.height) * viewBoxParams.height;
+    
+    setNodePositions((prev) => ({
+      ...prev,
+      [activeDragNode]: {
+        x: svgX - dragOffset.x,
+        y: svgY - dragOffset.y,
+      },
+    }));
+  };
+
+  const handleTouchStart = (e, nodeId) => {
+    if (!svgRef.current || e.touches.length === 0) return;
+    
+    const touch = e.touches[0];
+    const rect = svgRef.current.getBoundingClientRect();
+    const svgX = viewBoxParams.minX + ((touch.clientX - rect.left) / rect.width) * viewBoxParams.width;
+    const svgY = viewBoxParams.minY + ((touch.clientY - rect.top) / rect.height) * viewBoxParams.height;
+    
+    const currentPos = nodePositions[nodeId] || { x: 0, y: 0 };
+    setActiveDragNode(nodeId);
+    setDragOffset({
+      x: svgX - currentPos.x,
+      y: svgY - currentPos.y,
+    });
+  };
+
+  const handleTouchMove = (e) => {
+    if (!activeDragNode || !svgRef.current || e.touches.length === 0) return;
+    
+    const touch = e.touches[0];
+    const rect = svgRef.current.getBoundingClientRect();
+    const svgX = viewBoxParams.minX + ((touch.clientX - rect.left) / rect.width) * viewBoxParams.width;
+    const svgY = viewBoxParams.minY + ((touch.clientY - rect.top) / rect.height) * viewBoxParams.height;
+    
+    setNodePositions((prev) => ({
+      ...prev,
+      [activeDragNode]: {
+        x: svgX - dragOffset.x,
+        y: svgY - dragOffset.y,
+      },
+    }));
+  };
+
+  const handleMouseUp = () => {
+    setActiveDragNode(null);
+  };
+
+  // Re-calculate nodes and edge paths when local positions change
+  const { nodes, edges } = useMemo(() => {
+    const nodes = fsm.states.map((s) => ({
+      ...s,
+      x: nodePositions[s.id]?.x ?? s.x,
+      y: nodePositions[s.id]?.y ?? s.y,
+    }));
+
+    const stateMap = Object.fromEntries(nodes.map((s) => [s.id, s]));
     const edgeCounter = {};
 
     const edges = fsm.transitions.map((t, idx) => {
@@ -84,30 +194,27 @@ export const FSMDiagram = ({ fsm }) => {
       const offset = (edgeCounter[key] - 1) * 35 - (edgeCounter[key] > 1 ? 17 : 0);
       const from = stateMap[t.from];
       const to = stateMap[t.to];
+      
+      if (!from || !to) return null;
+      
       const { path, labelX, labelY } = getEdgePath(from, to, offset);
       return { id: `${idx}`, ...t, path, labelX, labelY };
-    });
+    }).filter(Boolean);
 
-    // viewBox calculation
-    const xs = fsm.states.map((s) => s.x);
-    const ys = fsm.states.map((s) => s.y);
-    const minX = Math.min(...xs) - 40;
-    const minY = Math.min(...ys) - 80;
-    const maxX = Math.max(...xs) + NODE_W + 40;
-    const maxY = Math.max(...ys) + NODE_H + 60;
-
-    return {
-      nodes: fsm.states,
-      edges,
-      viewBox: `${minX} ${minY} ${maxX - minX} ${maxY - minY}`,
-    };
-  }, [fsm]);
+    return { nodes, edges };
+  }, [fsm, nodePositions]);
 
   return (
     <svg
-      viewBox={viewBox}
+      ref={svgRef}
+      viewBox={viewBoxParams.viewBox}
       preserveAspectRatio="xMidYMid meet"
-      className="w-full h-full"
+      className="w-full h-full select-none"
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleMouseUp}
       data-testid={`fsm-diagram-${fsm.id}`}
     >
       <defs>
@@ -167,13 +274,16 @@ export const FSMDiagram = ({ fsm }) => {
       {nodes.map((n) => {
         const s = nodeStyles[n.type] || nodeStyles.normal;
         const isHovered = hoveredState === n.id;
+        const isDragging = activeDragNode === n.id;
         return (
           <g
             key={n.id}
             transform={`translate(${n.x}, ${n.y})`}
+            onMouseDown={(e) => handleMouseDown(e, n.id)}
+            onTouchStart={(e) => handleTouchStart(e, n.id)}
             onMouseEnter={() => setHoveredState(n.id)}
             onMouseLeave={() => setHoveredState(null)}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: isDragging ? "grabbing" : "grab" }}
             data-testid={`fsm-state-${fsm.id}-${n.id}`}
           >
             <rect
@@ -183,9 +293,9 @@ export const FSMDiagram = ({ fsm }) => {
               ry={16}
               fill={s.fill}
               stroke={s.stroke}
-              strokeWidth={isHovered ? 3 : 2}
+              strokeWidth={isHovered || isDragging ? 3 : 2}
               filter="url(#node-shadow)"
-              style={{ transition: "all 0.2s" }}
+              style={{ transition: isDragging ? "none" : "stroke-width 0.2s, fill 0.2s" }}
             />
             {n.type === "initial" && (
               <circle cx={-12} cy={NODE_H / 2} r={6} fill="#059669" />
@@ -210,6 +320,7 @@ export const FSMDiagram = ({ fsm }) => {
               fontWeight="700"
               fill={s.text}
               fontFamily="Outfit, sans-serif"
+              style={{ pointerEvents: "none" }}
             >
               {n.name}
             </text>
@@ -222,6 +333,7 @@ export const FSMDiagram = ({ fsm }) => {
               fill={s.text}
               opacity="0.7"
               fontFamily="JetBrains Mono, monospace"
+              style={{ pointerEvents: "none" }}
             >
               {n.id}
             </text>
