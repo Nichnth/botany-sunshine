@@ -64,7 +64,7 @@ const GamePage = () => {
             href="/"
             className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold tracking-wide flex items-center gap-1 bg-slate-900/60 border border-slate-800 px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
           >
-            ← Kembali ke Dokumentasi FSM
+            ← Menu Utama
           </a>
         </div>
 
@@ -78,7 +78,7 @@ const GamePage = () => {
             Botany Sunshine
           </h1>
           <p className="text-sm text-slate-400 tracking-[0.25em] uppercase font-mono mb-10">
-            Simulasi Kebun Hidroponik NFT
+            Simulasi Kebun Hidroponik
           </p>
 
           {/* Menu Buttons Stack */}
@@ -117,7 +117,7 @@ const GamePage = () => {
               className="w-full py-4 px-6 bg-slate-950/80 hover:bg-slate-900/80 border border-slate-800/80 text-slate-400 hover:text-sky-400 hover:border-sky-500/50 rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md"
             >
               <span className="flex items-center gap-1.5">
-                <User size={14} /> Pembuat Game
+                <User size={14} /> Game Author
               </span>
               <ChevronRight size={16} />
             </button>
@@ -161,19 +161,16 @@ const GamePage = () => {
               Nicholas Abel
             </h2>
             <p className="text-[10px] tracking-widest uppercase font-mono text-emerald-400 mt-1">
-              Lead Simulation Architect
+              Game Designer | Game Developer
             </p>
           </div>
 
           <div className="space-y-4 text-sm text-slate-300 leading-relaxed border-t border-slate-850 pt-5 font-sans">
             <p>
-              Halo! Saya <strong>Nicholas Abel</strong>, pengembang di balik <strong>Botany Sunshine</strong>. 
+              Perkenalkan, nama saya <strong>Nicholas Abel</strong>, author sekaligus game developer dari game <strong>Botany Sunshine</strong>. 
             </p>
             <p>
-              Proyek ini dirancang sebagai gabungan dari modul dokumentasi Finite State Machine (FSM) terperinci dengan game simulasi pertanian hidroponik NFT yang interaktif dan responsif.
-            </p>
-            <p className="text-xs text-slate-400">
-              Pengembangan menggunakan React, Tailwind CSS, Lucide icons, dan FastAPI untuk backend status logging.
+              Game ini dirancang untuk memberikan pengalaman menjadi petani hidroponik. Proyek ini dirancang sebagai gabungan dari modul dokumentasi Finite State Machine (FSM) terperinci dengan game simulasi pertanian hidroponik yang interaktif.
             </p>
           </div>
 
