@@ -54,10 +54,10 @@ const Sidebar = () => {
         </div>
         <div>
           <h1 className="text-base font-bold tracking-tight text-[#064E3B] font-[Outfit]">
-            HidroFarm FSM
+            Botany Sunshine
           </h1>
           <p className="text-[10px] tracking-[0.2em] uppercase text-[#4B5563]">
-            Dokumentasi Diagram
+            Hydroponic Farm Sim
           </p>
         </div>
       </NavLink>
